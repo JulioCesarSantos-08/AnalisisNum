@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Método de la Secante</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f4f8;
+        }
+        h1 {
+            color: #333;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calculadora: Método de la Secante</h1>
+    <label>Valor inicial P0: <input type="number" id="p0" step="any"></label>
+    <label>Valor inicial P1: <input type="number" id="p1" step="any"></label>
+    <label>Tolerancia: <input type="number" id="tol" value="0.000001" step="any"></label>
+    <label>Iteraciones máximas: <input type="number" id="maxIter" value="50"></label>
+    <button onclick="calcularSecante()">Calcular</button>
+
+    <table id="resultado">
+        <thead>
+            <tr>
+                <th>n</th>
+                <th>Pn</th>
+                <th>f(Pn)</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        function f(x) {
+            return Math.cos(x) - x;
+        }
+
+        function calcularSecante() {
+            const p0 = parseFloat(document.getElementById('p0').value);
+            const p1 = parseFloat(document.getElementById('p1').value);
+            const tol = parseFloat(document.getElementById('tol').value);
+            const maxIter = parseInt(document.getElementById('maxIter').value);
+            
+            let tabla = document.querySelector('#resultado tbody');
+            tabla.innerHTML = '';
+
+            let n = 0;
+            let x0 = p0;
+            let x1 = p1;
+            let fx0 = f(x0);
+            let fx1 = f(x1);
+
+            while (n < maxIter) {
+                const row = tabla.insertRow();
+                row.insertCell().textContent = n;
+                row.insertCell().textContent = x1.toFixed(6);
+                row.insertCell().textContent = fx1.toFixed(6);
+
+                if (Math.abs(fx1) < tol) break;
+
+                const x2 = x1 - fx1 * (x1 - x0) / (fx1 - fx0);
+                x0 = x1;
+                fx0 = fx1;
+                x1 = x2;
+                fx1 = f(x1);
+                n++;
+            }
+        }
+    </script>
+</body>
+</html>
