@@ -7,44 +7,29 @@
     <link rel="icon" href="imagenes/logo.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjs@11.11.0/lib/browser/math.js"></script> <!-- LIBRERÍA NUEVA -->
 </head>
 <body>
     <h1>Método de la Secante</h1>
     <h4>Santos Julio Cesar</h4>
-    <h5>La función es editable.</h5>
 
-    <label>Función f(x):
-        <input type="text" id="funcion" value="Math.pow(x, 3) - 2 * x + 2">
-    </label>
-
-    <label>Valor inicial P0:
-        <input type="number" id="p0" step="any">
-    </label>
-
-    <label>Valor inicial P1:
-        <input type="number" id="p1" step="any">
-    </label>
-
-    <label>Tolerancia:
-        <input type="number" id="tol" value="0.000001" step="any">
-    </label>
-
-    <label>Iteraciones máximas:
-        <input type="number" id="maxIter" value="50">
-    </label>
-
+    <label>Función f(x): <input type="text" id="funcion" placeholder="Ingresa tu fórmula" value=""></label>
+    <label>Valor inicial P0: <input type="number" id="p0" step="any"></label>
+    <label>Valor inicial P1: <input type="number" id="p1" step="any"></label>
+    <label>Tolerancia: <input type="number" id="tol" value="0.000001" step="any"></label>
+    <label>Iteraciones máximas: <input type="number" id="maxIter" value="50"></label>
     <button onclick="calcularSecante()">Calcular</button>
-    <button id="reiniciar" onclick="reiniciarFormulario()">Reiniciar</button>
 
     <table id="resultado">
         <thead>
             <tr>
-                <th>Iteración</th>
+                <th>Iteraciones</th>
                 <th>Pn</th>
                 <th>f(Pn)</th>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+        </tbody>
     </table>
 
     <canvas id="grafica"></canvas>
