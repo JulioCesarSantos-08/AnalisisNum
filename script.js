@@ -5,7 +5,7 @@ function f(x) {
     try {
         return eval(formula);
     } catch (error) {
-        alert("Error en la función. Usa sintaxis válida de JavaScript, como: Math.sin(x), Math.exp(x), etc.");
+        alert("Error en la función. Usa sintaxis válida de JavaScript como Math.sin(x), Math.exp(x), etc.");
         throw error;
     }
 }
@@ -15,6 +15,11 @@ function calcularSecante() {
     const p1 = parseFloat(document.getElementById('p1').value);
     const tol = parseFloat(document.getElementById('tol').value);
     const maxIter = parseInt(document.getElementById('maxIter').value);
+
+    if (isNaN(p0) || isNaN(p1) || isNaN(tol) || isNaN(maxIter)) {
+        alert("Por favor completa todos los campos correctamente.");
+        return;
+    }
 
     let tabla = document.querySelector('#resultado tbody');
     tabla.innerHTML = '';
@@ -39,7 +44,13 @@ function calcularSecante() {
 
         if (Math.abs(fx1) < tol) break;
 
-        const x2 = x1 - fx1 * (x1 - x0) / (fx1 - fx0);
+        const denominador = (fx1 - fx0);
+        if (denominador === 0) {
+            alert("Se encontró una división por cero en el método de la secante. Cálculo detenido.");
+            break;
+        }
+
+        const x2 = x1 - fx1 * (x1 - x0) / denominador;
         x0 = x1;
         fx0 = fx1;
         x1 = x2;
@@ -54,25 +65,24 @@ function dibujarGrafica(labels, pnData, xMin, xMax) {
     const ctx = document.getElementById('grafica').getContext('2d');
     if (grafica) grafica.destroy();
 
-    // Datos para función f(x)
     const puntosFx = [];
-    const paso = (xMax - xMin) / 100;
-    for (let x = xMin - 1; x <= xMax + 1; x += paso) {
+    const paso = (xMax - xMin) / 100 || 0.1; // Evitar paso cero si xMin = xMax
+
+    for (let x = xMin - 5; x <= xMax + 5; x += paso) {
         try {
             puntosFx.push({ x: x, y: f(x) });
         } catch (e) {
-            puntosFx.push({ x: x, y: null }); // En caso de error, dejar el punto en blanco
+            puntosFx.push({ x: x, y: null });
         }
     }
 
     grafica = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
             datasets: [
                 {
                     label: 'Pn en cada iteración',
-                    data: pnData,
+                    data: labels.map((n, i) => ({ x: n, y: pnData[i] })),
                     borderColor: 'blue',
                     backgroundColor: 'lightblue',
                     fill: false,
@@ -99,12 +109,22 @@ function dibujarGrafica(labels, pnData, xMin, xMax) {
             scales: {
                 x: {
                     type: 'linear',
-                    title: { display: true, text: 'x / Iteraciones' }
+                    title: { display: true, text: 'Iteraciones / Eje X' }
                 },
                 y: {
-                    title: { display: true, text: 'Valor' }
+                    title: { display: true, text: 'Valor de Pn o f(x)' }
                 }
             }
         }
     });
+}
+
+function reiniciarFormulario() {
+    document.getElementById('funcion').value = "Math.pow(x, 3) - 2 * x + 2";
+    document.getElementById('p0').value = "";
+    document.getElementById('p1').value = "";
+    document.getElementById('tol').value = "0.000001";
+    document.getElementById('maxIter').value = "50";
+    document.querySelector('#resultado tbody').innerHTML = "";
+    if (grafica) grafica.destroy();
 }
