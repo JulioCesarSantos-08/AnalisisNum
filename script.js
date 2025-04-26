@@ -1,7 +1,13 @@
 let grafica;
 
 function f(x) {
-    return Math.cos(x) - x;
+    const formula = document.getElementById('funcion').value;
+    try {
+        return eval(formula);
+    } catch (error) {
+        alert("Error en la función. Usa sintaxis válida de JavaScript, como: Math.sin(x), Math.exp(x), etc.");
+        throw error;
+    }
 }
 
 function calcularSecante() {
@@ -9,7 +15,7 @@ function calcularSecante() {
     const p1 = parseFloat(document.getElementById('p1').value);
     const tol = parseFloat(document.getElementById('tol').value);
     const maxIter = parseInt(document.getElementById('maxIter').value);
-    
+
     let tabla = document.querySelector('#resultado tbody');
     tabla.innerHTML = '';
 
@@ -41,45 +47,62 @@ function calcularSecante() {
         n++;
     }
 
-    dibujarGrafica(iteraciones, valoresPn);
+    dibujarGrafica(iteraciones, valoresPn, p0, p1);
 }
 
-function dibujarGrafica(labels, data) {
+function dibujarGrafica(labels, pnData, xMin, xMax) {
     const ctx = document.getElementById('grafica').getContext('2d');
-    if (grafica) grafica.destroy(); // Destruir gráfica anterior
+    if (grafica) grafica.destroy();
+
+    // Datos para función f(x)
+    const puntosFx = [];
+    const paso = (xMax - xMin) / 100;
+    for (let x = xMin - 1; x <= xMax + 1; x += paso) {
+        try {
+            puntosFx.push({ x: x, y: f(x) });
+        } catch (e) {
+            puntosFx.push({ x: x, y: null }); // En caso de error, dejar el punto en blanco
+        }
+    }
 
     grafica = new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
-            datasets: [{
-                label: 'Pn en cada iteración',
-                data: data,
-                borderColor: 'blue',
-                backgroundColor: 'lightblue',
-                fill: false,
-                tension: 0.2
-            }]
+            datasets: [
+                {
+                    label: 'Pn en cada iteración',
+                    data: pnData,
+                    borderColor: 'blue',
+                    backgroundColor: 'lightblue',
+                    fill: false,
+                    tension: 0.2,
+                    yAxisID: 'y',
+                },
+                {
+                    label: 'f(x)',
+                    data: puntosFx,
+                    parsing: false,
+                    borderColor: 'red',
+                    backgroundColor: 'pink',
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'y',
+                }
+            ]
         },
         options: {
             responsive: true,
             plugins: {
-                legend: {
-                    display: true,
-                }
+                legend: { display: true }
             },
             scales: {
                 x: {
-                    title: {
-                        display: true,
-                        text: 'Iteraciones'
-                    }
+                    type: 'linear',
+                    title: { display: true, text: 'x / Iteraciones' }
                 },
                 y: {
-                    title: {
-                        display: true,
-                        text: 'Valor de Pn'
-                    }
+                    title: { display: true, text: 'Valor' }
                 }
             }
         }

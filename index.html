@@ -11,6 +11,8 @@
 <body>
     <h1>Método de la Secante</h1>
     <h4>Santos Julio Cesar</h4>
+    <h5>La funcion es editable.</h5>
+    <label>Función f(x): <input type="text" id="funcion" value="Math.pow(x, 3) - 2 * x + 2"></label>
     <label>Valor inicial P0: <input type="number" id="p0" step="any"></label>
     <label>Valor inicial P1: <input type="number" id="p1" step="any"></label>
     <label>Tolerancia: <input type="number" id="tol" value="0.000001" step="any"></label>
@@ -20,7 +22,7 @@
     <table id="resultado">
         <thead>
             <tr>
-                <th>n</th>
+                <th>iteraciones</th>
                 <th>Pn</th>
                 <th>f(Pn)</th>
             </tr>
