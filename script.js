@@ -1,12 +1,18 @@
 let grafica;
 let funcionCompilada;
 
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('calcular').addEventListener('click', calcularSecante);
+    document.getElementById('reiniciar').addEventListener('click', limpiar);
+    document.getElementById('modo-oscuro').addEventListener('click', toggleModoOscuro);
+});
+
 function compilarFuncion() {
     const formula = document.getElementById('funcion').value;
     try {
         funcionCompilada = math.compile(formula);
     } catch (error) {
-        alert("Error en la función. Usa una sintaxis válida como: x^2 - 2x + 1, sin(x), exp(x), etc.");
+        mostrarMensaje("Error en la función. Usa una sintaxis válida.", true);
         throw error;
     }
 }
@@ -15,51 +21,74 @@ function f(x) {
     try {
         return funcionCompilada.evaluate({ x: x });
     } catch (error) {
-        alert("Error al evaluar la función en x = " + x);
+        mostrarMensaje("Error al evaluar f(x) en x = " + x, true);
         throw error;
     }
 }
 
 function calcularSecante() {
-    compilarFuncion(); // Compilamos cada vez que se calcule para actualizar cambios en la fórmula
+    try {
+        compilarFuncion();
 
-    const p0 = parseFloat(document.getElementById('p0').value);
-    const p1 = parseFloat(document.getElementById('p1').value);
-    const tol = parseFloat(document.getElementById('tol').value);
-    const maxIter = parseInt(document.getElementById('maxIter').value);
+        const p0 = parseFloat(document.getElementById('p0').value);
+        const p1 = parseFloat(document.getElementById('p1').value);
+        const tol = parseFloat(document.getElementById('tol').value);
+        const maxIter = parseInt(document.getElementById('maxIter').value);
 
-    let tabla = document.querySelector('#resultado tbody');
-    tabla.innerHTML = '';
+        if (isNaN(p0) || isNaN(p1) || isNaN(tol) || isNaN(maxIter)) {
+            mostrarMensaje("Por favor, ingresa todos los valores correctamente.", true);
+            return;
+        }
 
-    let n = 0;
-    let x0 = p0;
-    let x1 = p1;
-    let fx0 = f(x0);
-    let fx1 = f(x1);
+        let tabla = document.querySelector('#resultado tbody');
+        tabla.innerHTML = '';
 
-    let iteraciones = [];
-    let valoresPn = [];
+        let n = 0;
+        let x0 = p0;
+        let x1 = p1;
+        let fx0 = f(x0);
+        let fx1 = f(x1);
 
-    while (n < maxIter) {
-        const row = tabla.insertRow();
-        row.insertCell().textContent = n;
-        row.insertCell().textContent = x1.toFixed(6);
-        row.insertCell().textContent = fx1.toFixed(6);
+        let iteraciones = [];
+        let valoresPn = [];
 
-        iteraciones.push(n);
-        valoresPn.push(x1);
+        while (n < maxIter) {
+            const row = tabla.insertRow();
+            row.insertCell().textContent = n;
+            row.insertCell().textContent = x1.toFixed(6);
+            row.insertCell().textContent = fx1.toExponential(3);
 
-        if (Math.abs(fx1) < tol) break;
+            iteraciones.push(n);
+            valoresPn.push(x1);
 
-        const x2 = x1 - fx1 * (x1 - x0) / (fx1 - fx0);
-        x0 = x1;
-        fx0 = fx1;
-        x1 = x2;
-        fx1 = f(x1);
-        n++;
+            if (Math.abs(fx1) < tol) {
+                break;
+            }
+
+            const denominador = fx1 - fx0;
+            if (denominador === 0) {
+                mostrarMensaje("Error: División por cero.", true);
+                return;
+            }
+
+            const x2 = x1 - fx1 * (x1 - x0) / denominador;
+            x0 = x1;
+            fx0 = fx1;
+            x1 = x2;
+            fx1 = f(x1);
+            n++;
+        }
+
+        dibujarGrafica(iteraciones, valoresPn, p0, p1);
+
+        if (n === maxIter) {
+            mostrarMensaje("Se alcanzó el máximo de iteraciones sin encontrar la raíz.", true);
+        } else {
+            mostrarMensaje("✅ Raíz aproximada encontrada: " + x1.toFixed(6));
+        }
+    } catch (error) {
+        console.error(error);
     }
-
-    dibujarGrafica(iteraciones, valoresPn, p0, p1);
 }
 
 function dibujarGrafica(labels, pnData, xMin, xMax) {
@@ -81,7 +110,7 @@ function dibujarGrafica(labels, pnData, xMin, xMax) {
         data: {
             datasets: [
                 {
-                    label: 'Pn en cada iteración',
+                    label: 'Pn en iteraciones',
                     data: labels.map((label, index) => ({ x: label, y: pnData[index] })),
                     borderColor: 'blue',
                     backgroundColor: 'lightblue',
@@ -117,4 +146,30 @@ function dibujarGrafica(labels, pnData, xMin, xMax) {
             }
         }
     });
+}
+
+function limpiar() {
+    document.getElementById('funcion').value = '';
+    document.getElementById('p0').value = '';
+    document.getElementById('p1').value = '';
+    document.getElementById('tol').value = '';
+    document.getElementById('maxIter').value = '';
+    document.querySelector('#resultado tbody').innerHTML = '';
+    if (grafica) grafica.destroy();
+    document.getElementById('mensaje').style.display = 'none';
+}
+
+function toggleModoOscuro() {
+    document.body.classList.toggle('oscuro');
+}
+
+function mostrarMensaje(texto, esError = false) {
+    const mensajeDiv = document.getElementById('mensaje');
+    mensajeDiv.textContent = texto;
+    mensajeDiv.className = 'mensaje-resultado';
+    if (esError) {
+        mensajeDiv.classList.add('error');
+    } else {
+        mensajeDiv.classList.add('exito');
+    }
 }
